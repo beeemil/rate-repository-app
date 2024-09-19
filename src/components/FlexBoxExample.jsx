@@ -27,4 +27,4 @@ const FlexboxExample = () => {
   );
 };
 
-export default FlexboxExample
+export default FlexboxExample;

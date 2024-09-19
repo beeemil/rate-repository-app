@@ -3,6 +3,9 @@ import { TextInput, Pressable, View, StyleSheet } from 'react-native';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import theme from '../theme';
+import useSignIn from '../hooks/useSignIn';
+import { useNavigate } from 'react-router-native';
+
 const styles = StyleSheet.create({
   container: {
     padding: 16, // Padding around the form
@@ -34,7 +37,7 @@ const styles = StyleSheet.create({
 const initialValues = {
   username: '',
   password: ''
-}
+};
 
 const validationSchema = yup.object().shape({
   username: yup
@@ -50,15 +53,18 @@ const SignInForm = ({ onSubmit }) => {
     initialValues,
     onSubmit,
     validationSchema,
-  })
-  let borderColorUsername = formik.touched.username && formik.errors.username ? 'red' : '#ccc'
-  let borderColorPassword = formik.touched.password && formik.errors.password ? 'red' : '#ccc'
+    validateOnChange: true,
+    validateOnBlur: true,
+  });
+  let borderColorUsername = formik.touched.username && formik.errors.username ? 'red' : '#ccc';
+  let borderColorPassword = formik.touched.password && formik.errors.password ? 'red' : '#ccc';
   return (
     <View style={styles.container}>
       <TextInput
         placeholder='Username'
         value={formik.values.username}
         onChangeText={formik.handleChange('username')}
+        onBlur={formik.handleBlur('username')}
         style={{ ...styles.input, borderColor: borderColorUsername }}
       />
        {formik.touched.username && formik.errors.username && (
@@ -67,6 +73,7 @@ const SignInForm = ({ onSubmit }) => {
         placeholder='password'
         value={formik.values.password}
         onChangeText={formik.handleChange('password')}
+        onBlur={formik.handleBlur('password')}
         secureTextEntry={true}
         style={{ ...styles.input, borderColor: borderColorPassword }}
       />
@@ -76,18 +83,24 @@ const SignInForm = ({ onSubmit }) => {
         <Text>log in</Text>
       </Pressable>
     </View>
-  )
+  );
 };
 
 const UserLogin = () => {
-  const onSubmit = values => {
-    const username = values.username
-    const password = values.password
-    console.log('username',username)
-    console.log('password',password)
-    
-  }
-  return <SignInForm onSubmit={onSubmit}/>
-}
+  const navigate = useNavigate();
+  const [signIn] = useSignIn();
+  const onSubmit = async (values) => {
+    const { username, password } = values;
+    try {
+      const dat = await signIn({ username:username, password:password });
+      console.log('dat',dat);
+      navigate('/');
+    }
+    catch (e) {
+      console.log('errori',e);
+    }
+  };
+  return <SignInForm onSubmit={onSubmit}/>;
+};
 
 export default UserLogin;
